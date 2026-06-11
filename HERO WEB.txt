@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HeroLevite Website Development</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --blue: #0a6cf5;
+    --blue-glow: #1a8fff;
+    --blue-dark: #021b5c;
+    --red: #e01a2b;
+    --red-glow: #ff2d3f;
+    --gold: #f0b429;
+    --gold-glow: #ffd166;
+    --bg: #03080f;
+    --bg2: #060d1a;
+    --surface: #0b1628;
+    --text: #d4e6ff;
+    --text-dim: #6a8ab5;
+    --border: rgba(26, 143, 255, 0.18);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  #cursor {
+    position: fixed; top: 0; left: 0;
+    width: 12px; height: 12px;
+    background: var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.08s, width 0.2s, height 0.2s, background 0.2s;
+    box-shadow: 0 0 18px var(--gold-glow);
+  }
+  #cursor-ring {
+    position: fixed; top: 0; left: 0;
+    width: 38px; height: 38px;
+    border: 1.5px solid var(--blue-glow);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.18s, width 0.2s, height 0.2s;
+    box-shadow: 0 0 12px rgba(26,143,255,0.4);
+  }
+
+  /* Scanline overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 9000;
+  }
+
+  /* Grid background */
+  .grid-bg {
+    position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+  }
+  .grid-bg::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(10,108,245,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(10,108,245,0.07) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: grid-drift 30s linear infinite;
+  }
+  @keyframes grid-drift {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(60px); }
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 0 5vw;
+    height: 70px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(3,8,15,0.82);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    text-shadow: 0 0 18px var(--gold-glow);
+  }
+  .nav-logo span { color: var(--blue-glow); }
+  nav ul {
+    list-style: none;
+    display: flex; gap: 2.5rem;
+  }
+  nav ul li a {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.2s, text-shadow 0.2s;
+    position: relative;
+  }
+  nav ul li a::after {
+    content: '';
+    position: absolute; bottom: -4px; left: 0; right: 0;
+    height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transition: transform 0.25s;
+  }
+  nav ul li a:hover { color: var(--gold); text-shadow: 0 0 10px var(--gold-glow); }
+  nav ul li a:hover::after { transform: scaleX(1); }
+
+  /* HERO */
+  #hero {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 100px 5vw 60px;
+    overflow: hidden;
+  }
+
+  .hero-bg-orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(80px);
+    animation: orb-float 8s ease-in-out infinite alternate;
+  }
+  .orb1 { width: 520px; height: 520px; background: radial-gradient(circle, rgba(10,108,245,0.22), transparent 70%); top: -100px; left: -120px; animation-delay: 0s; }
+  .orb2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(224,26,43,0.15), transparent 70%); bottom: -80px; right: -80px; animation-delay: -4s; }
+  .orb3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(240,180,41,0.12), transparent 70%); top: 40%; left: 50%; transform: translateX(-50%); animation-delay: -2s; }
+
+  @keyframes orb-float {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, 30px) scale(1.08); }
+  }
+
+  .hero-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--red);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 0.7rem;
+    animation: fade-down 0.9s ease both;
+  }
+  .hero-tag::before, .hero-tag::after {
+    content: '';
+    flex: 1; max-width: 60px;
+    height: 1px;
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red-glow);
+  }
+
+  h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2.4rem, 7vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+    animation: fade-up 1s ease 0.2s both;
+  }
+  h1 .gold { color: var(--gold); text-shadow: 0 0 40px var(--gold-glow), 0 0 80px rgba(240,180,41,0.3); }
+  h1 .blue { color: var(--blue-glow); text-shadow: 0 0 40px rgba(26,143,255,0.6); }
+
+  .hero-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    color: var(--text-dim);
+    margin: 1.4rem auto 2.6rem;
+    max-width: 640px;
+    line-height: 1.6;
+    animation: fade-up 1s ease 0.4s both;
+  }
+  .hero-sub em { color: var(--gold); font-style: normal; }
+
+  .hero-ctas {
+    display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center;
+    animation: fade-up 1s ease 0.6s both;
+  }
+
+  .btn-primary {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.9rem 2.4rem;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color: #fff;
+    border: 1px solid var(--blue-glow);
+    text-decoration: none;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    transition: all 0.25s;
+    box-shadow: 0 0 20px rgba(10,108,245,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: left 0.4s;
+  }
+  .btn-primary:hover { box-shadow: 0 0 40px rgba(10,108,245,0.6); transform: translateY(-2px); }
+  .btn-primary:hover::before { left: 160%; }
+
+  .btn-secondary {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.9rem 2.4rem;
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    text-decoration: none;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    transition: all 0.25s;
+    box-shadow: 0 0 16px rgba(240,180,41,0.2);
+  }
+  .btn-secondary:hover { background: rgba(240,180,41,0.08); box-shadow: 0 0 32px rgba(240,180,41,0.45); transform: translateY(-2px); }
+
+  .hero-stats {
+    margin-top: 5rem;
+    display: flex; gap: 3.5rem; flex-wrap: wrap; justify-content: center;
+    animation: fade-up 1s ease 0.8s both;
+  }
+  .stat {
+    text-align: center;
+    position: relative;
+  }
+  .stat::after {
+    content: '';
+    position: absolute; right: -1.75rem; top: 15%;
+    height: 70%; width: 1px;
+    background: var(--border);
+  }
+  .stat:last-child::after { display: none; }
+  .stat-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 0 0 20px var(--gold-glow);
+    display: block;
+  }
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* SECTIONS */
+  section { position: relative; z-index: 1; }
+
+  .section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 5vw;
+  }
+
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--red);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 0.7rem;
+    display: flex; align-items: center; gap: 0.8rem;
+  }
+  .section-label::before {
+    content: '';
+    width: 30px; height: 1px;
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red-glow);
+  }
+
+  h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+    line-height: 1.1;
+  }
+  h2 .accent-gold { color: var(--gold); text-shadow: 0 0 25px var(--gold-glow); }
+  h2 .accent-blue { color: var(--blue-glow); }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: linear-gradient(90deg, var(--blue), var(--red));
+    margin: 1.2rem 0 2.5rem;
+    box-shadow: 0 0 14px rgba(10,108,245,0.5);
+  }
+
+  /* ABOUT */
+  #about { background: var(--bg2); }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+  }
+  .about-text p {
+    font-size: 1.12rem;
+    line-height: 1.8;
+    color: var(--text-dim);
+    margin-bottom: 1.2rem;
+  }
+  .about-text p strong { color: var(--gold); font-weight: 600; }
+  .about-visual {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hex-frame {
+    position: relative;
+    width: 280px; height: 280px;
+  }
+  .hex-frame svg {
+    width: 100%; height: 100%;
+    filter: drop-shadow(0 0 30px rgba(10,108,245,0.5));
+    animation: rotate-hex 20s linear infinite;
+  }
+  @keyframes rotate-hex { to { transform: rotate(360deg); } }
+  .hex-inner {
+    position: absolute; inset: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .hex-inner .icon {
+    font-size: 3rem;
+    margin-bottom: 0.4rem;
+    filter: drop-shadow(0 0 12px var(--gold-glow));
+  }
+  .hex-inner span {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .badges {
+    display: flex; flex-wrap: wrap; gap: 0.7rem;
+    margin-top: 1.5rem;
+  }
+  .badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--border);
+    color: var(--blue-glow);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(10,108,245,0.06);
+    transition: all 0.2s;
+  }
+  .badge:hover { border-color: var(--blue-glow); background: rgba(10,108,245,0.15); box-shadow: 0 0 16px rgba(10,108,245,0.3); }
+
+  /* SERVICES */
+  #services { background: var(--bg); }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  .service-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .service-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--red), var(--gold));
+    transform: scaleX(0);
+    transition: transform 0.35s;
+  }
+  .service-card:hover { transform: translateY(-6px); border-color: rgba(26,143,255,0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 30px rgba(10,108,245,0.1); }
+  .service-card:hover::before { transform: scaleX(1); }
+  .card-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    color: var(--red);
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+  }
+  .card-icon {
+    font-size: 2.4rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .service-card h3 {
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.8rem;
+  }
+  .service-card p {
+    font-size: 1rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .card-glow {
+    position: absolute; bottom: -60px; right: -60px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(10,108,245,0.1), transparent 70%);
+    pointer-events: none;
+  }
+
+  /* WHY CHOOSE */
+  #why { background: var(--bg2); }
+  .why-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+    margin-top: 1rem;
+  }
+  .why-items { display: flex; flex-direction: column; gap: 1.4rem; }
+  .why-item {
+    display: flex; gap: 1.2rem; align-items: flex-start;
+    padding: 1.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .why-item:hover { border-left-color: var(--red); box-shadow: -4px 0 20px rgba(224,26,43,0.25); transform: translateX(4px); }
+  .why-icon {
+    font-size: 1.8rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .why-item h4 {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4rem;
+  }
+  .why-item p { font-size: 0.97rem; color: var(--text-dim); line-height: 1.6; }
+
+  .why-manifesto {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .why-manifesto::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, rgba(10,108,245,0.05) 0%, transparent 50%, rgba(240,180,41,0.05) 100%);
+    pointer-events: none;
+  }
+  .manifesto-quote {
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  .manifesto-quote::before {
+    content: '"';
+    font-size: 5rem;
+    color: var(--blue);
+    opacity: 0.15;
+    position: absolute;
+    top: -1.5rem; left: -0.5rem;
+    font-family: Georgia, serif;
+    line-height: 1;
+  }
+  .manifesto-body {
+    font-size: 1rem;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+  .manifesto-body strong { color: var(--text); }
+  .manifesto-sig {
+    margin-top: 2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--border);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .manifesto-sig span { color: var(--gold); }
+
+  /* CONTACT */
+  #contact { background: var(--bg); }
+  .contact-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .contact-info h3 {
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .contact-info p { font-size: 1rem; color: var(--text-dim); line-height: 1.7; margin-bottom: 2rem; }
+  .contact-details { display: flex; flex-direction: column; gap: 1rem; }
+  .contact-line {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.9rem 1.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .contact-line:hover { border-color: var(--gold); box-shadow: 0 0 20px rgba(240,180,41,0.15); }
+  .contact-line .cl-icon { font-size: 1.3rem; }
+  .contact-line .cl-text { font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; color: var(--text-dim); }
+
+  .contact-form { display: flex; flex-direction: column; gap: 1.2rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    padding: 0.85rem 1.1rem;
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+    resize: none;
+    appearance: none;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: var(--blue-glow);
+    box-shadow: 0 0 16px rgba(10,108,245,0.25);
+  }
+  .form-group textarea { min-height: 130px; }
+  .form-group select option { background: var(--bg2); }
+  .submit-btn {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 1.1rem 2rem;
+    background: linear-gradient(135deg, var(--red), #8b0d18);
+    color: #fff;
+    border: 1px solid var(--red);
+    cursor: none;
+    clip-path: polygon(14px 0%, 100% 0%, calc(100% - 14px) 100%, 0% 100%);
+    transition: all 0.25s;
+    box-shadow: 0 0 24px rgba(224,26,43,0.35);
+    position: relative; overflow: hidden;
+  }
+  .submit-btn:hover { box-shadow: 0 0 48px rgba(224,26,43,0.6); transform: translateY(-2px); }
+
+  /* FOOTER */
+  footer {
+    position: relative; z-index: 1;
+    background: #020509;
+    border-top: 1px solid var(--border);
+    padding: 2rem 5vw;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.9rem;
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 0 0 12px var(--gold-glow);
+  }
+  .footer-copy {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+  }
+  .footer-location {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .footer-location::before { content: '📍'; }
+
+  /* ANIMATIONS */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-down {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* TICKER */
+  .ticker-wrap {
+    overflow: hidden;
+    background: rgba(10,108,245,0.06);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 0.7rem 0;
+    position: relative; z-index: 1;
+  }
+  .ticker {
+    display: flex; gap: 0;
+    animation: ticker 28s linear infinite;
+    white-space: nowrap;
+  }
+  .ticker span {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0 2.5rem;
+  }
+  .ticker span b { color: var(--gold); font-weight: normal; }
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .about-grid, .why-grid, .contact-wrapper { grid-template-columns: 1fr; gap: 2.5rem; }
+    .services-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    nav ul { gap: 1.2rem; }
+  }
+  @media (max-width: 600px) {
+    nav ul { display: none; }
+    .hero-stats { gap: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div class="grid-bg"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">HERO<span>LEVITE</span></div>
+  <ul>
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#why">Why Us</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-orb orb1"></div>
+  <div class="hero-bg-orb orb2"></div>
+  <div class="hero-bg-orb orb3"></div>
+
+  <div class="hero-tag">Uganda · Web Development · Est. 2024</div>
+
+  <h1>
+    <span class="gold">Hero</span><span class="blue">Levite</span><br>
+    Website<br>Development
+  </h1>
+
+  <p class="hero-sub">
+    Crafting <em>cutting-edge digital experiences</em> for businesses across Uganda and beyond — no shortcuts, no compromises.
+  </p>
+
+  <div class="hero-ctas">
+    <a href="#services" class="btn-primary">Explore Services</a>
+    <a href="#contact" class="btn-secondary">Start a Project</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-num">100%</span>
+      <span class="stat-label">Quality Delivered</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">0%</span>
+      <span class="stat-label">Shortcuts Taken</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">∞</span>
+      <span class="stat-label">Dedication</span>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span>Web Design <b>●</b></span>
+    <span>Uganda <b>●</b></span>
+    <span>HeroLevite <b>●</b></span>
+    <span>Premium Quality <b>●</b></span>
+    <span>No Shortcuts <b>●</b></span>
+    <span>Business Websites <b>●</b></span>
+    <span>Modern Design <b>●</b></span>
+    <span>Futuristic Experience <b>●</b></span>
+    <!-- duplicate for seamless loop -->
+    <span>Web Design <b>●</b></span>
+    <span>Uganda <b>●</b></span>
+    <span>HeroLevite <b>●</b></span>
+    <span>Premium Quality <b>●</b></span>
+    <span>No Shortcuts <b>●</b></span>
+    <span>Business Websites <b>●</b></span>
+    <span>Modern Design <b>●</b></span>
+    <span>Futuristic Experience <b>●</b></span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <div class="section-label">Who We Are</div>
+        <h2>Meet <span class="accent-gold">Hero</span><span class="accent-blue"> Levite</span></h2>
+        <div class="divider"></div>
+        <p>
+          Based in the heart of <strong>Uganda</strong>, Hero Levite is a professional web designer committed to building digital platforms that are as beautiful as they are functional.
+        </p>
+        <p>
+          Every project is approached with <strong>full dedication and zero shortcuts</strong>. From concept to launch, the focus remains on crafting websites that not only look extraordinary but perform at the highest level for the businesses that depend on them.
+        </p>
+        <p>
+          Uganda's businesses deserve world-class digital presence — and that is exactly what HeroLevite Website Development delivers, every single time.
+        </p>
+        <div class="badges">
+          <span class="badge">UI / UX Design</span>
+          <span class="badge">Web Development</span>
+          <span class="badge">Mobile-First</span>
+          <span class="badge">Kampala, Uganda</span>
+          <span class="badge">Business Solutions</span>
+        </div>
+      </div>
+      <div class="about-visual reveal">
+        <div class="hex-frame">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <polygon
+              points="100,10 185,55 185,145 100,190 15,145 15,55"
+              fill="none"
+              stroke="url(#hexGrad)"
+              stroke-width="2"
+              stroke-dasharray="10 5"
+            />
+            <defs>
+              <linearGradient id="hexGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#0a6cf5"/>
+                <stop offset="50%" stop-color="#f0b429"/>
+                <stop offset="100%" stop-color="#e01a2b"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="hex-inner">
+            <span class="icon">🌍</span>
+            <span>Based in Uganda</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-inner">
+    <div class="section-label reveal">Who We Work For</div>
+    <h2 class="reveal">Our <span class="accent-gold">Services</span></h2>
+    <div class="divider reveal"></div>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="card-num">// 01</div>
+        <span class="card-icon">🏢</span>
+        <h3>Established Companies</h3>
+        <p>Large organisations and established companies looking to modernize their digital presence, revamp outdated websites, or build powerful web platforms that match their scale.</p>
+        <div class="card-glow"></div>
+      </div>
+      <div class="service-card reveal">
+        <div class="card-num">// 02</div>
+        <span class="card-icon">🛍️</span>
+        <h3>Small Businesses</h3>
+        <p>Small and medium enterprises that need a professional, high-quality website to compete in today's digital market — built to impress clients and drive real business growth.</p>
+        <div class="card-glow"></div>
+      </div>
+      <div class="service-card reveal">
+        <div class="card-num">// 03</div>
+        <span class="card-icon">🚀</span>
+        <h3>New Businesses</h3>
+        <p>Startups and brand new ventures launching their first digital presence. We help you hit the ground running with a website that establishes credibility from day one.</p>
+        <div class="card-glow"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY CHOOSE US -->
+<section id="why">
+  <div class="section-inner">
+    <div class="section-label reveal">Our Promise</div>
+    <h2 class="reveal">Why <span class="accent-gold">Choose</span> Us</h2>
+    <div class="divider reveal"></div>
+    <div class="why-grid">
+      <div class="why-items">
+        <div class="why-item reveal">
+          <span class="why-icon">⚡</span>
+          <div>
+            <h4>Zero Compromise on Quality</h4>
+            <p>Every element — from layout to load speed — is meticulously crafted. We never accept mediocre output on any project, big or small.</p>
+          </div>
+        </div>
+        <div class="why-item reveal">
+          <span class="why-icon">🎯</span>
+          <div>
+            <h4>We Do Not Slack</h4>
+            <p>HeroLevite brings the same intensity and professionalism to every project. No client gets a half-effort. You pay for excellence, you get excellence.</p>
+          </div>
+        </div>
+        <div class="why-item reveal">
+          <span class="why-icon">🏆</span>
+          <div>
+            <h4>Premium Products</h4>
+            <p>We build websites that are visually stunning, technically solid, and strategically designed to help your business succeed online.</p>
+          </div>
+        </div>
+        <div class="why-item reveal">
+          <span class="why-icon">🌐</span>
+          <div>
+            <h4>Built for Uganda & Beyond</h4>
+            <p>Rooted in Uganda, our work meets international standards. Your business deserves a global-quality digital presence, right here at home.</p>
+          </div>
+        </div>
+      </div>
+      <div class="why-manifesto reveal">
+        <div class="manifesto-quote">
+          "Good enough is never good enough. Every pixel matters."
+        </div>
+        <div class="manifesto-body">
+          At HeroLevite Website Development, we operate on a single founding principle: <strong>there is no project too small to deserve excellence</strong>.<br><br>
+          Whether we're building a landing page for a local startup or a full corporate platform for an established company, the standard never drops. We don't cut corners. We don't deliver rushed work. We don't settle.<br><br>
+          That's not just a promise — it's how we work, every day, on every project.
+        </div>
+        <div class="manifesto-sig">— <span>Hero Levite</span>, Founder & Lead Designer</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-inner">
+    <div class="section-label reveal">Get In Touch</div>
+    <h2 class="reveal">Start Your <span class="accent-gold">Project</span></h2>
+    <div class="divider reveal"></div>
+    <div class="contact-wrapper">
+      <div class="contact-info reveal">
+        <h3>Let's Build Something Great</h3>
+        <p>Ready to take your business to the next level with a world-class website? Reach out and let's talk about your vision.</p>
+        <div class="contact-details">
+          <div class="contact-line">
+            <span class="cl-icon">📍</span>
+            <span class="cl-text">Uganda, East Africa</span>
+          </div>
+          <div class="contact-line">
+            <span class="cl-icon">✉️</span>
+            <span class="cl-text">hello@herolevite.com</span>
+          </div>
+          <div class="contact-line">
+            <span class="cl-icon">💬</span>
+            <span class="cl-text">Available for new projects</span>
+          </div>
+        </div>
+      </div>
+      <div class="contact-form reveal" id="contactForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" placeholder="John Doe" />
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" placeholder="john@company.com" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Business Type</label>
+          <select>
+            <option value="">Select your business type</option>
+            <option>Established Company</option>
+            <option>Small Business</option>
+            <option>New / Startup Business</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Project Details</label>
+          <textarea placeholder="Tell us about your project and what you need..."></textarea>
+        </div>
+        <button class="submit-btn" onclick="handleSubmit()">⚡ Send Message</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">HEROLEVITE</div>
+  <div class="footer-copy">© 2024 HeroLevite Website Development. All rights reserved.</div>
+  <div class="footer-location">Uganda, East Africa</div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top  = e.clientY + 'px';
+    setTimeout(() => {
+      ring.style.left = e.clientX + 'px';
+      ring.style.top  = e.clientY + 'px';
+    }, 80);
+  });
+  document.querySelectorAll('a, button, .service-card, .why-item, .contact-line').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.width = '20px';
+      cursor.style.height = '20px';
+      cursor.style.background = '#e01a2b';
+      ring.style.width = '55px';
+      ring.style.height = '55px';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.width = '12px';
+      cursor.style.height = '12px';
+      cursor.style.background = 'var(--gold)';
+      ring.style.width = '38px';
+      ring.style.height = '38px';
+    });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+
+  // Form submit
+  function handleSubmit() {
+    const btn = document.querySelector('.submit-btn');
+    btn.textContent = '✅ Message Sent!';
+    btn.style.background = 'linear-gradient(135deg, #0a6cf5, #021b5c)';
+    btn.style.borderColor = '#0a6cf5';
+    setTimeout(() => {
+      btn.textContent = '⚡ Send Message';
+      btn.style.background = '';
+      btn.style.borderColor = '';
+    }, 3000);
+  }
+</script>
+</body>
+</html>
